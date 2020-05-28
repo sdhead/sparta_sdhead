@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding&display=swap" rel="stylesheet">
+
+    <!-- 구글폰트-->
+    <title>2주차 숙제</title>
+
+    <style>
+        * {
+            font-family: 'Nanum Gothic Coding', monospace;
+        }
+
+        .wrap {
+            margin: auto;
+            width: 900px;
+        }
+
+        .button {
+            margin: 0px 0px 0px 300px;
+            width: 30%;
+
+        }
+
+        .title_img {
+            color: white;
+            width: 700px;
+            height: 300px;
+
+
+            background-image: url('https://img1.daumcdn.net/thumb/R400x0/?fname=%2Fmedia%2Fvitraya%2Fauto%2Fimage%2Fa05063%2F3A97F669C004B81069D759112FDD071003FF9BC24CF23F5B66_5XNG');
+            background-position: center;
+            background-size: cover;
+
+            margin: 30px auto 20px auto;
+
+        }
+
+        .money_style {
+            color: blue;
+            font-weight: bold;
+        }
+    </style>
+
+    <!-- Java Script-->
+    <script>
+
+
+        $(document).ready(function () {
+            // alert('메롱');
+            $.ajax({
+                type: "GET",
+                url: "https://api.manana.kr/exchange/rate.json",
+                data: {},
+                success: function (response) {                    
+                    //let money_won = response[1]['rate'];
+                    let money_won = `<h5 class="money_style" id="won_info">달러-원 환율 : ${response[1]['rate']}</h5>`;
+
+                    $('#won_info').empty();                    
+                    $('#won_info').append(money_won);
+                }
+            })
+        });
+
+
+        function order_com() {            
+            if ($('#order_name_value').val() == '') {
+                alert('주문자 이름을 넣어주세요');
+                return;
+            } else if ($('#inputGroupSelect01').val() == '수량을 선택하세요') {
+                alert('수량을 선택하세요');
+                return;
+            } else if ($('#address').val() == '') {
+                alert('주소를 입력하세요');
+                return;
+            } else if ($('#tel_num').val() == '') {
+                alert('전화번호를 입력하세요');
+                return;
+            }
+
+            if (($('#tel_num').val().match(/-/g) || []).length == 2) {
+                let in_tel_01 = $('#tel_num').val().split('-')[0];
+                let in_tel_02 = $('#tel_num').val().split('-')[1];
+                let in_tel_03 = $('#tel_num').val().split('-')[2];
+
+                if ((in_tel_01 != '010') || (in_tel_02.length != 4) || (in_tel_03.length != 4)) {
+                    alert('전화번호 형식이 다릅니다. \n 010-0000-0000 형식으로 입력해주세요.');
+                    return;
+                }
+            } else {
+                alert('전화번호 형식이 다릅니다. \n 010-0000-0000 형식으로 입력해주세요.');
+                return;
+            }
+
+            alert('주문이 완료되었습니다');
+        }
+
+    </script>
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="title_img">
+
+        </div>
+
+        <div>
+            <p> <span style="font-size: 40px;">타이어는 역시 스파르타 타이어!</span>
+                <span style="font-size: 20px;"> 가격 : 100,000원 / 개 </span>
+            </p>
+        </div>
+
+        <div>
+            세단, SUV 모든 차에 장착가능한 4계절 타이어 입니다. <br>
+            편안한 승차감, 확실한 제동력, 조용한 소음은 스파르타 타이어의 강점입니다. <br>
+            이번에 구매를 하시면 보증기간 연장도 포함됩니다.
+            가족을 위한 최고의 선택 스파르타아!~
+            <br>
+            <br>
+        </div>
+
+        <div>
+            <!-- 환율정보 넣기 -->
+            <h5 class="money_style" id="won_info">달러-원 환율 : </h5>
+            <br>
+        </div>
+
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">주문자이름</span>
+            </div>
+            <input type="text" class="form-control" id="order_name_value">
+        </div>
+
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <label class="input-group-text" for="inputGroupSelect01">수량</label>
+            </div>
+            <select class="custom-select" id="inputGroupSelect01">
+                <option selected>수량을 선택하세요</option>
+                <option value="1">한개</option>
+                <option value="2">두개</option>
+                <option value="3">세개</option>
+                <option value="4">네개</option>
+            </select>
+        </div>
+
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">주소</span>
+            </div>
+            <input type="text" class="form-control" id="address">
+        </div>
+
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">전화번호</span>
+            </div>
+            <input type="text" class="form-control" id="tel_num">
+        </div>
+
+        <button onclick="order_com()" type="button" class="btn btn-primary button">주문하기</button>
+
+    </div>
+
+</body>
+
+</html>
