@@ -18,8 +18,10 @@ chart_infos = soup.select('#body-content > div.newest-list > div > table > tbody
 for chart_info in chart_infos :
 
     #순위 스크래핑
+    #rank = tr.select_one('td.number').text[0:2].strip()
     rank = chart_info.select_one('td.number')       
     rank = rank.text.strip().split('\n')[0]
+    
 
     #제목 스크래핑
     title = chart_info.select_one('td.info > a.title.ellipsis')
