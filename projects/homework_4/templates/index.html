@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding&display=swap" rel="stylesheet">
+
+    <!-- 구글폰트-->
+    <title>4주차 숙제</title>
+
+    <style>
+        * {
+            font-family: 'Nanum Gothic Coding', monospace;
+        }
+
+        .wrap {
+            margin: auto;
+            width: 900px;
+        }
+
+        .button {
+            margin: 0px 0px 0px 300px;
+            width: 30%;
+
+        }
+
+        .title_img {
+            color: white;
+            width: 700px;
+            height: 300px;
+
+
+            background-image: url('https://img1.daumcdn.net/thumb/R400x0/?fname=%2Fmedia%2Fvitraya%2Fauto%2Fimage%2Fa05063%2F3A97F669C004B81069D759112FDD071003FF9BC24CF23F5B66_5XNG');
+            background-position: center;
+            background-size: cover;
+
+            margin: 30px auto 20px auto;
+
+        }
+
+        .money_style {
+            color: blue;
+            font-weight: bold;
+        }
+
+        .blank {
+            margin: 20px;
+        }
+    </style>
+
+    <!-- Java Script-->
+    <script>
+
+
+        $(document).ready(function () {
+            // alert('메롱');
+            $.ajax({
+                type: "GET",
+                url: "https://api.manana.kr/exchange/rate.json",
+                data: {},
+                success: function (response) {
+                    //let money_won = response[1]['rate'];
+                    let money_won = `<h5 class="money_style" id="won_info">달러-원 환율 : ${response[1]['rate']}</h5>`;
+
+                    $('#won_info').empty();
+                    $('#won_info').append(money_won);
+                }
+            })
+
+            // $('#orders-box').html('');
+            listing();
+        });
+
+
+        function order_com() {
+            if ($('#order_name_value').val() == '') {
+                alert('주문자 이름을 넣어주세요');
+                return;
+            } else if ($('#inputGroupSelect01').val() == '수량을 선택하세요') {
+                alert('수량을 선택하세요');
+                return;
+            } else if ($('#address').val() == '') {
+                alert('주소를 입력하세요');
+                return;
+            } else if ($('#tel_num').val() == '') {
+                alert('전화번호를 입력하세요');
+                return;
+            }
+
+            if (($('#tel_num').val().match(/-/g) || []).length == 2) {
+                let in_tel_01 = $('#tel_num').val().split('-')[0];
+                let in_tel_02 = $('#tel_num').val().split('-')[1];
+                let in_tel_03 = $('#tel_num').val().split('-')[2];
+
+                if ((in_tel_01 != '010') || (in_tel_02.length != 4) || (in_tel_03.length != 4)) {
+                    alert('전화번호 형식이 다릅니다. \n 010-0000-0000 형식으로 입력해주세요.');
+                    return;
+                }
+            } else {
+                alert('전화번호 형식이 다릅니다. \n 010-0000-0000 형식으로 입력해주세요.');
+                return;
+            }
+
+            let order_name = $('#order_name_value').val();
+            let order_cnt = $('#inputGroupSelect01').val();
+            let order_address = $('#address').val();
+            let order_tel = $('#tel_num').val();
+
+
+            // 3. POST /reviews 에 저장을 요청합니다.
+            $.ajax({
+                type: "POST",
+                url: "/order",
+                data: { name_give: order_name, cnt_give: order_cnt, address_give: order_address, tel_give: order_tel },
+                success: function (response) {
+                    if (response['result'] == 'success') {
+                        alert(response['msg']);
+                        window.location.reload();
+                    }
+                }
+            })
+
+
+
+        }
+
+        function listing() {
+            // 1. 주문 목록을 서버에 요청하기
+            // 2. 요청 성공 여부 확인하기
+            // 3. 요청 성공했을 때 주문목록올 바르게 화면에 나타내기
+
+            $.ajax({
+                type: "GET",
+                url: "/order_list",
+                data: {},
+                success: function (response) {
+                    if (response['result'] == 'success') {
+                        // console.log(response['all_order']);
+                        let order_list = response['all_order'];
+                        for(i=0; i < order_list.length; i++ ) {
+                            let o_name = order_list[i]['name'];
+                            let o_cnt = order_list[i]['cnt'];
+                            let o_adress = order_list[i]['address'];
+                            let o_tel = order_list[i]['tel'];
+
+                            make_html(o_name,o_cnt,o_adress,o_tel);
+                        }
+                    } else {
+                        alert('주문목록을 받아오지 못했습니다');
+                    }
+                }
+            });
+        }
+
+        function make_html(o_name,o_cnt,o_adress,o_tel) {
+            let tmmp_html = `<tr>
+                                <th scope="row">${o_name}</th>
+                                <td>${o_cnt}</td>
+                                <td>${o_adress}</td>
+                                <td>${o_tel}</td>
+                            </tr>`;
+
+            $('#list_view').append(tmmp_html);
+        }
+
+    </script>
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="title_img">
+
+        </div>
+
+        <div>
+            <p> <span style="font-size: 40px;">타이어는 역시 스파르타 타이어!</span>
+                <span style="font-size: 20px;"> 가격 : 100,000원 / 개 </span>
+            </p>
+        </div>
+
+        <div>
+            세단, SUV 모든 차에 장착가능한 4계절 타이어 입니다. <br>
+            편안한 승차감, 확실한 제동력, 조용한 소음은 스파르타 타이어의 강점입니다. <br>
+            이번에 구매를 하시면 보증기간 연장도 포함됩니다.
+            가족을 위한 최고의 선택 스파르타아!~
+            <br>
+            <br>
+        </div>
+
+        <div>
+            <!-- 환율정보 넣기 -->
+            <h5 class="money_style" id="won_info">달러-원 환율 : </h5>
+            <br>
+        </div>
+
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">주문자이름</span>
+            </div>
+            <input type="text" class="form-control" id="order_name_value">
+        </div>
+
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <label class="input-group-text" for="inputGroupSelect01">수량</label>
+            </div>
+            <select class="custom-select" id="inputGroupSelect01">
+                <option selected>수량을 선택하세요</option>
+                <option value="1">한개</option>
+                <option value="2">두개</option>
+                <option value="3">세개</option>
+                <option value="4">네개</option>
+            </select>
+        </div>
+
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">주소</span>
+            </div>
+            <input type="text" class="form-control" id="address">
+        </div>
+
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">전화번호</span>
+            </div>
+            <input type="text" class="form-control" id="tel_num">
+        </div>
+
+        <button onclick="order_com()" type="button" class="btn btn-primary button">주문하기</button>
+
+        <!-- 주문목록 보여주기 -->
+        <table class="table blank">
+            <thead>
+                <tr>
+                    <th scope="col">주문자이름</th>
+                    <th scope="col">주문수량</th>
+                    <th scope="col">주소</th>
+                    <th scope="col">연락처</th>
+                </tr>
+            </thead>
+            <tbody id="list_view">
+                
+            </tbody>
+        </table>
+
+    </div>
+
+</body>
+
+</html>
