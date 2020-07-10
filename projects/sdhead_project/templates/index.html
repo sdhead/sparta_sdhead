@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+
+
+    <!-- 구글폰트-->
+    <link href="https://fonts.googleapis.com/css2?family=Gugi&display=swap" rel="stylesheet">
+
+    <title>상두네 가족 일상 공유하기</title>
+    <style type="text/css">
+        * {
+            font-family: 'Gugi', cursive;
+        }
+
+        .wrap {
+            margin: auto;
+            width: 1000px;
+        }
+
+        .text-size {
+            margin: auto;
+            /* width: 50px; */
+            padding: auto 20px auto 20px;
+        }
+
+        .comment {
+            color: blue;
+            font-weight: bold;
+        }
+
+        .posting-box {
+            margin: 10px auto 10px auto;
+            width: 1000px;
+
+            border: 3px solid black;
+            border radius: 5px;
+            padding: 20px;
+
+            display: none;
+
+        }
+    </style>
+    <script>
+
+        $(document).ready(function () {
+            // alert('로딩~!');
+            listing();
+
+        });
+
+        function getTime() {
+            let t = new Date()
+
+            let year_date = t.getFullYear();
+            let month_date = new String(t.getMonth() + 1);
+            let day_date = new String(t.getDate());
+
+            if (month_date.length == 1) {
+                month_date = '0' + month_date;
+            }
+
+            if (day_date.length == 1) {
+                day_date = '0' + day_date;
+            }
+
+            return year_date + '-' + month_date + '-' + day_date;
+        }
+
+
+
+        function openclose() {
+            // alert('안녕!');
+            let status = $('#post-box').css('display');
+            if (status == 'block') {
+                $('#post-box').hide();
+                $('#posting-box-btn').text('글 쓰기');
+            } else {
+                $('#post-box').show();
+                $('#posting-box-btn').text('글 닫기');
+                $('#current_date').val(getTime());
+            }
+        }
+
+        function listing() {
+
+            $.ajax({
+                type: "GET",
+                url: "/read_info",
+                data: {},
+                success: function (response) {
+                    if (response['result'] == 'success') {
+                        // alert(response['msg']);
+                        // 2. 성공했을 때 리뷰를 올바르게 화면에 나타내기
+                        //console.log(response['all_review'])
+
+                        let memorys = response['all_memory'];
+
+                        for (i = 0; i < memorys.length; i++) {
+                            let get_writer = memorys[i]['writer'];
+                            let get_writeTime = memorys[i]['date'];
+                            let get_picturePath = memorys[i]['picture_path'];
+                            let get_urlLink = memorys[i]['url'];
+                            let get_memo = memorys[i]['memo'];
+
+                            make_memory(get_writeTime, get_writer, get_urlLink, get_memo);
+                        }
+
+                    } else {
+                        alert('내용을 받아오지 못했습니다');
+                    }
+                }
+            });
+
+        }
+
+        function make_memory(get_writeTime, get_writer, get_urlLink, get_memo) {
+            let tmp_html = `<tr>
+                                <td>${get_writeTime}</td>
+                                <td>${get_writer}</td>
+                                <td>${get_urlLink}</td>
+                                <td>${get_memo}</td>
+                            </tr>`;
+
+            $('#orders-box').append(tmp_html);
+
+        }
+
+
+        function order_com() {
+
+            if ($('#inputGroupSelect01').val() == '글쓴이를 선택하세요') {
+                alert('글쓴이를 선택해주세요');
+                return;
+            }
+
+            if ($('#current_date').val() == '') {
+                alert('날짜를 넣어주세요');
+                return;
+            }
+
+            if ($('#content').val() == '') {
+                alert('내용을 넣어주세요');
+                return;
+            }
+
+            $('#picture_path').text($('#inputGroupFile01').val());
+
+            // alert($('#inputGroupSelect01').val());
+            // alert($('#current_date').val());
+            // alert($('#inputGroupFile01').val());
+            // alert($('#url_link').val());
+            // alert($('#content').val());
+
+            let give_writer = $('#inputGroupSelect01').val();
+            let give_writeTime = $('#current_date').val();
+            let give_picturePath = $('#inputGroupFile01').val();
+            let give_urlLink = $('#url_link').val();
+            let give_memo = $('#content').val();
+
+            $.ajax({
+                type: "POST",
+                url: "/save_info",
+                data: { in_writer: give_writer, in_date: give_writeTime, in_filePath: give_picturePath, in_urlPath: give_urlLink, in_memo: give_memo },
+                success: function (response) { // 성공하면
+                    if (response['result'] == 'success') {
+                        alert(response['msg']);
+                        // 3. 성공 시 페이지 새로고침하기
+                        window.location.reload();
+                    } else {
+                        alert('서버 오류!');
+                    }
+                }
+            })
+
+        }
+
+    </script>
+
+
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="jumbotron">
+            <h1 class="display-4">우리가족 일상다반사</h1>
+            <p class="lead">상두네 가족의 일상을 적고 추억을 공유하는 공간입니다.</p>
+            <hr class="my-4">
+            <!-- <p>It uses utility classes for typography and spacing to space content out within the larger container.</p> -->
+            <p class="lead">
+                <a id="posting-box-btn" onclick="openclose()" class="btn btn-primary btn-lg" href="#" role="button">글
+                    쓰기</a>
+            </p>
+        </div>
+
+        <div class="posting-box" id="post-box">
+            <div>
+                <div class="input-group mb-3">
+                    <!-- <span class="input-group-prepend">
+                        <label class="input-group-text" for="inputGroupSelect01">글쓴이</label>
+                    </span> -->
+                    <select class="custom-select" id="inputGroupSelect01">
+                        <option selected>글쓴이를 선택하세요</option>
+                        <option value="아빠">아빠</option>
+                        <option value="엄마">엄마</option>
+                        <option value="동우">동우</option>
+                        <option value="재우">재우</option>
+                    </select>
+
+                    <div>
+                        <input id="current_date" type="text" class="form-control text-size"
+                            aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+
+                    </div>
+
+
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="inputGroupFile01"
+                            aria-describedby="inputGroupFileAddon01">
+                        <label id="picture_path" class="custom-file-label" for="inputGroupFile01">사진올리기</label>
+                    </div>
+
+
+                </div>
+            </div>
+
+
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="inputGroup-sizing-default">URL 주소 넣기</span>
+                </div>
+                <input id="url_link" type="text" class="form-control" aria-label="Sizing example input"
+                    aria-describedby="inputGroup-sizing-default">
+            </div>
+
+
+            <div class="form-group">
+                <label for="exampleFormControlTextarea1">글 쓰기</label>
+                <textarea id="content" class="form-control" id="exampleFormControlTextarea1" rows="7"></textarea>
+            </div>
+
+            <button onclick="order_com()" type="button"" class=" btn btn-primary">추억저장하기</button>
+        </div>
+
+        <!-- <div class="card-columns" id="cards-box">
+
+        </div> -->
+
+        <div class="orders">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">날짜</th>
+                        <th scope="col">글쓴이</th>
+                        <th scope="col">링크</th>
+                        <th scope="col">내용</th>
+                    </tr>
+                </thead>
+                <tbody id="orders-box">
+                    <!-- <tr>
+                        <td>Otto</td>
+                        <td>@mdo</td>
+                        <td>@mdo</td>
+                        <td>@mdo</td>
+                    </tr> -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>
